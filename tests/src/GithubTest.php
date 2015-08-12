@@ -35,6 +35,13 @@ class GithubTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('GET', $verb);
     }
 
+    public function testUrlDoesNotContainQueryStringWhenNoParamsSet()
+    {
+        $url = $this->client->getUrl();
+
+        $this->assertNotContains('?', $url);
+    }
+
     public function testUrlContainsSearchParametersWhenProvided()
     {
         $client = new \ReflectionClass(Github::class);
@@ -54,6 +61,7 @@ class GithubTest extends \PHPUnit_Framework_TestCase
         $url = $newClient->getUrl();
 
         array_walk($params, function ($v, $k) use ($url) {
+            $this->assertContains('?', $url);
             $this->assertContains($k.'='.$v, $url);
         });
     }
@@ -69,6 +77,7 @@ class GithubTest extends \PHPUnit_Framework_TestCase
             $value = uniqid();
             $url = $this->client->$k($value)->getUrl();
 
+            $this->assertContains('?', $url);
             $this->assertContains($v.'='.$value, $url);
         });
     }
