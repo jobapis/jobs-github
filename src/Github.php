@@ -40,7 +40,7 @@ class Github extends AbstractProvider
     ];
 
     /**
-     * Create new authentic jobs client.
+     * Create new github jobs client.
      *
      * @param array $parameters
      */
@@ -88,6 +88,8 @@ class Github extends AbstractProvider
                 // do nothing
             }
         });
+
+        $job = $this->setCityStateLocation($job);
 
         return $job;
     }
@@ -175,6 +177,22 @@ class Github extends AbstractProvider
         $fullTime = (bool) $value ? '1' : null;
 
         return $this->updateQuery($fullTime, 'full_time');
+    }
+
+    public function setCityStateLocation($job)
+    {
+        if (isset($job->location)) {
+            $locationArray = static::parseLocation($job->location);
+
+            if (isset($locationArray[0])) {
+                $job->setCity($locationArray[0]);
+            }
+            if (isset($locationArray[1])) {
+                $job->setState($locationArray[1]);
+            }
+        }
+
+        return $job;
     }
 
     /**
