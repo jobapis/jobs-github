@@ -7,7 +7,8 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/JobBrander/jobs-github.svg?style=flat-square)](https://scrutinizer-ci.com/g/JobBrander/jobs-github)
 [![Total Downloads](https://img.shields.io/packagist/dt/jobbrander/jobs-github.svg?style=flat-square)](https://packagist.org/packages/jobbrander/jobs-github)
 
-This package provides Github Jobs API support for the JobBrander's [Jobs Client](https://github.com/JobBrander/jobs-common).
+This package provides [Github Jobs API](https://jobs.github.com/api)
+support for the JobBrander's [Jobs Client](https://github.com/JobBrander/jobs-common).
 
 ## Installation
 

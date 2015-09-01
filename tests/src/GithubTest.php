@@ -122,6 +122,7 @@ class GithubTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($payload['company'], $job->getCompanyName());
         $this->assertEquals($payload['company_logo'], $job->getCompanyLogo());
         $this->assertEquals($payload['company_url'], $job->getCompanyUrl());
+        $this->assertContains($job->getJobLocation()->getAddress()->getAddressLocality(), $payload['location']);
     }
 
     protected function getListingJson()
