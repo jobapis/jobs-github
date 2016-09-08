@@ -54,6 +54,7 @@ class GithubProvider extends AbstractProvider
     protected function getJobSetterMap()
     {
         return [
+            'setCompany' => 'company',
             'setCompanyName' => 'company',
             'setCompanyLogo' => 'company_logo',
             'setCompanyUrl' => 'company_url',
@@ -61,6 +62,7 @@ class GithubProvider extends AbstractProvider
             'setDatePostedAsString' => 'created_at',
             'setLocation' => 'location',
             'setName' => 'title',
+            'setTitle' => 'title',
             'setSourceId' => 'id',
             'setUrl' => 'url',
             'setWorkHours' => 'type',
@@ -75,6 +77,16 @@ class GithubProvider extends AbstractProvider
     public function getListingsPath()
     {
         return '';
+    }
+
+    /**
+     * Get source attribution
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return 'Github';
     }
 
     /**

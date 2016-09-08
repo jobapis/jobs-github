@@ -1,116 +1,52 @@
 <?php namespace JobApis\Jobs\Client\Tests;
 
 use DateTime;
+use JobApis\Jobs\Client\Collection;
 use JobApis\Jobs\Client\Job;
-use JobApis\Jobs\Client\Providers\Github;
+use JobApis\Jobs\Client\Providers\GithubProvider;
+use JobApis\Jobs\Client\Queries\GithubQuery;
 use Mockery as m;
 
 class GithubProviderTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->params = [];
+        $this->query = m::mock('JobApis\Jobs\Client\Queries\GithubQuery');
 
-        $this->client = new Github($this->params);
+        $this->client = new GithubProvider($this->query);
     }
 
-    public function testClientUsesListingsPath()
+    public function testItCanGetDefaultResponseFields()
     {
-        $listingsPath = $this->client->getListingsPath();
-
-        $this->assertEquals('', $listingsPath);
+        $fields = [
+            'company',
+            'company_logo',
+            'company_url',
+            'description',
+            'created_at',
+            'title',
+            'id',
+            'url',
+            'type',
+        ];
+        $this->assertEquals($fields, $this->client->getDefaultResponseFields());
     }
 
-    public function testClientUsesJsonFormat()
+    public function testItCanGetListingsPath()
     {
-        $format = $this->client->getFormat();
-
-        $this->assertEquals('json', $format);
+        $this->assertEmpty($this->client->getListingsPath());
     }
 
-    public function testClientUsesGetMethod()
+    public function testItCanGetSource()
     {
-        $verb = $this->client->getVerb();
-
-        $this->assertEquals('GET', $verb);
+        $this->assertEquals('Github', $this->client->getSource());
     }
 
-    public function testUrlDoesNotContainQueryStringWhenNoParamsSet()
-    {
-        $url = $this->client->getUrl();
-
-        $this->assertNotContains('?', $url);
-    }
-
-    public function testUrlContainsSearchParametersWhenProvided()
-    {
-        $client = new \ReflectionClass(Github::class);
-        $property = $client->getProperty("searchMap");
-        $property->setAccessible(true);
-        $searchMap = $property->getValue($this->client);
-
-        $searchParameters = array_values($searchMap);
-        $params = [];
-
-        array_map(function ($item) use (&$params) {
-            $params[$item] = uniqid();
-        }, $searchParameters);
-
-        $newClient = new Github(array_merge($this->params, $params));
-
-        $url = $newClient->getUrl();
-
-        array_walk($params, function ($v, $k) use ($url) {
-            $this->assertContains('?', $url);
-            $this->assertContains($k.'='.$v, $url);
-        });
-    }
-
-    public function testUrlContainsSearchParametersWhenSet()
-    {
-        $client = new \ReflectionClass(Github::class);
-        $property = $client->getProperty("searchMap");
-        $property->setAccessible(true);
-        $searchMap = $property->getValue($this->client);
-
-        array_walk($searchMap, function ($v, $k) {
-            $value = uniqid();
-            $url = $this->client->$k($value)->getUrl();
-
-            $this->assertContains('?', $url);
-            $this->assertContains($v.'='.$value, $url);
-        });
-    }
-
-    public function testUrlContainsFullTimeEqualToOneWhenTruthyOptionsProvided()
-    {
-        $options = [1, -2, 'foo', 2.3e5, true, array(2), "false"];
-
-        array_map(function ($option) {
-            $url = $this->client->setFullTime($option)->getUrl();
-
-            $this->assertContains('full_time=1', $url);
-        }, $options);
-    }
-
-    public function testUrlContainsFullTimeEqualTo0WhenFalseyOptionsProvided()
-    {
-        $options = [0, '', false, array(), null];
-
-        array_map(function ($option) {
-            $url = $this->client->setFullTime($option)->getUrl();
-
-            $this->assertNotContains('full_time', $url);
-        }, $options);
-    }
-
-    public function testCreateJobObject()
+    public function testItCanCreateJobObjectFromPayload()
     {
         $json = $this->getListingJson();
         $payload = json_decode($json, true);
-
         $job = $this->client->createJobObject($payload);
-
         $this->assertInstanceOf(Job::class, $job);
         $this->assertEquals($payload['id'], $job->getSourceId());
         $this->assertEquals($payload['title'], $job->getName());
@@ -123,6 +59,71 @@ class GithubProviderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($payload['company_logo'], $job->getCompanyLogo());
         $this->assertEquals($payload['company_url'], $job->getCompanyUrl());
         $this->assertContains($job->getJobLocation()->getAddress()->getAddressLocality(), $payload['location']);
+    }
+
+    // Integration test for the client's getJobs() method.
+    public function testItCanGetJobs()
+    {
+        $options = [
+            'search' => uniqid(),
+            'location' => uniqid(),
+            'page' => rand(1,10),
+        ];
+
+        $guzzle = m::mock('GuzzleHttp\Client');
+
+        $query = new GithubQuery($options);
+
+        $client = new GithubProvider($query);
+
+        $client->setClient($guzzle);
+
+        $response = m::mock('GuzzleHttp\Message\Response');
+
+        $jobObjects = [
+            json_decode($this->getListingJson()),
+            json_decode($this->getListingJson()),
+            json_decode($this->getListingJson()),
+        ];
+
+        $jobs = json_encode($jobObjects);
+
+        $guzzle->shouldReceive('get')
+            ->with($query->getUrl(), [])
+            ->once()
+            ->andReturn($response);
+        $response->shouldReceive('getBody')
+            ->once()
+            ->andReturn($jobs);
+
+        $results = $client->getJobs();
+
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertCount(count($jobObjects), $results);
+    }
+
+    // Integration test with actual API call to the provider.
+    public function testItCanGetJobsFromApi()
+    {
+        if (!getenv('REAL_CALL')) {
+            $this->markTestSkipped('REAL_CALL not set. Real API call will not be made.');
+        }
+
+        $keyword = 'engineering';
+
+        $query = new GithubQuery([
+            'search' => $keyword,
+        ]);
+
+        $client = new GithubProvider($query);
+
+        $results = $client->getJobs();
+
+        $this->assertInstanceOf('JobApis\Jobs\Client\Collection', $results);
+
+        foreach($results as $job) {
+            $this->assertEquals($keyword, $job->query);
+        }
     }
 
     protected function getListingJson()
