@@ -49,14 +49,12 @@ class GithubQueryTest extends \PHPUnit_Framework_TestCase
         $this->query->get(uniqid());
     }
 
-    /*
     public function testItSetsAndGetsValidAttributes()
     {
         $attributes = [
-            'text' => uniqid(),
-            'country' => uniqid(),
-            'diceid' => uniqid(),
-            'sort' => uniqid(),
+            'search' => uniqid(),
+            'location' => uniqid(),
+            'full_time' => uniqid(),
         ];
 
         foreach ($attributes as $key => $value) {
@@ -69,10 +67,8 @@ class GithubQueryTest extends \PHPUnit_Framework_TestCase
 
         $url = $this->query->getUrl();
 
-        $this->assertContains('text=', $url);
-        $this->assertContains('country=', $url);
-        $this->assertContains('diceid=', $url);
-        $this->assertContains('sort=', $url);
+        $this->assertContains('search=', $url);
+        $this->assertContains('location=', $url);
+        $this->assertContains('full_time=', $url);
     }
-    */
 }
