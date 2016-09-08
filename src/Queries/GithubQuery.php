@@ -45,6 +45,13 @@ class GithubQuery extends AbstractQuery
     protected $full_time;
 
     /**
+     * Page number to return.
+     *
+     * @var string
+     */
+    protected $page;
+
+    /**
      * Get baseUrl
      *
      * @return  string Value of the base url to this api

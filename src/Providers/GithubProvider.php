@@ -1,78 +1,15 @@
 <?php namespace JobApis\Jobs\Client\Providers;
 
-use DateTime;
 use JobApis\Jobs\Client\Job;
 
 class GithubProvider extends AbstractProvider
 {
     /**
-     * Access token
-     *
-     * @var string
-     */
-    protected $token;
-
-    /**
-     * Map of setter methods to search parameters
-     *
-     * @var array
-     */
-    protected $searchMap = [
-        'setLattitude' => 'lat',
-        'setLongitude' => 'long',
-        'setLocation' => 'location',
-        'setKeyword' => 'description',
-        'setPage' => 'page',
-    ];
-
-    /**
-     * Current search parameters
-     *
-     * @var array
-     */
-    protected $searchParameters = [
-        'description' => null,
-        'location' => null,
-        'lat' => null,
-        'long' => null,
-        'full_time'  => null,
-        'page'  => null,
-    ];
-
-    /**
-     * Create new github jobs client.
-     *
-     * @param array $parameters
-     */
-    public function __construct($parameters = [])
-    {
-        parent::__construct($parameters);
-        array_walk($parameters, [$this, 'updateQuery']);
-    }
-
-    /**
-     * Magic method to handle get and set methods for properties
-     *
-     * @param  string $method
-     * @param  array  $parameters
-     *
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-        if (isset($this->searchMap[$method], $parameters[0])) {
-            $this->updateQuery($parameters[0], $this->searchMap[$method]);
-        }
-
-        return parent::__call($method, $parameters);
-    }
-
-    /**
      * Returns the standardized job object.
      *
      * @param array $payload
      *
-     * @return \JobBrander\Jobs\Client\Job
+     * @return \JobApis\Jobs\Client\Job
      */
     public function createJobObject($payload)
     {
@@ -94,14 +31,19 @@ class GithubProvider extends AbstractProvider
         return $job;
     }
 
-    /**
-     * Get data format.
-     *
-     * @return string
-     */
-    public function getFormat()
+    public function getDefaultResponseFields()
     {
-        return 'json';
+        return [
+            'company',
+            'company_logo',
+            'company_url',
+            'description',
+            'created_at',
+            'title',
+            'id',
+            'url',
+            'type',
+        ];
     }
 
     /**
@@ -136,49 +78,12 @@ class GithubProvider extends AbstractProvider
     }
 
     /**
-     * Retrieves query string.
+     * Sets city and state from single field on job
      *
-     * @return string
-     */
-    protected function getQueryString()
-    {
-        $query = http_build_query($this->searchParameters);
-
-        if ($query) {
-            $query = '&' . $query;
-        }
-
-        return $query;
-    }
-
-    /**
-     * Get url.
+     * @param Job $job Job object
      *
-     * @return  string
+     * @return Job
      */
-    public function getUrl()
-    {
-        return 'https://jobs.github.com/positions.'.$this->getFormat().
-            ($this->getQueryString() ? '?' . $this->getQueryString() : '');
-    }
-
-    /**
-     * Get http verb.
-     *
-     * @return  string
-     */
-    public function getVerb()
-    {
-        return 'GET';
-    }
-
-    public function setFullTime($value)
-    {
-        $fullTime = (bool) $value ? '1' : null;
-
-        return $this->updateQuery($fullTime, 'full_time');
-    }
-
     public function setCityStateLocation($job)
     {
         if (isset($job->location)) {
@@ -193,22 +98,5 @@ class GithubProvider extends AbstractProvider
         }
 
         return $job;
-    }
-
-    /**
-     * Attempts to update current query parameters.
-     *
-     * @param  string  $value
-     * @param  string  $key
-     *
-     * @return Github
-     */
-    protected function updateQuery($value, $key)
-    {
-        if (array_key_exists($key, $this->searchParameters)) {
-            $this->searchParameters[$key] = $value;
-        }
-
-        return $this;
     }
 }
