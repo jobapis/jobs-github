@@ -3,108 +3,46 @@
 class GithubQuery extends AbstractQuery
 {
     /**
-     * Direct hire jobs only
-     *
-     * @var boolean
-     */
-    protected $direct;
-
-    /**
-     * Jobs' area code
+     * A search term, such as "ruby" or "java". Aliases to "search"
      *
      * @var string
      */
-    protected $areacode;
+    protected $description;
 
     /**
-     * Country
+     * A search term, such as "ruby" or "java".
      *
      * @var string
      */
-    protected $country;
+    protected $search;
 
     /**
-     * State
+     * A city name, zip code, or other location search term.
      *
      * @var string
      */
-    protected $state;
+    protected $location;
 
     /**
-     * Skill to search for
+     * A specific latitude. If used, you must also send long and must not send location.
      *
      * @var string
      */
-    protected $skill;
+    protected $lat;
 
     /**
-     * City
+     * A specific longitude. If used, you must also send lat and must not send location.
      *
      * @var string
      */
-    protected $city;
+    protected $long;
 
     /**
-     * Search query string
+     * If you want to limit results to full time positions set this parameter to 'true'.
      *
      * @var string
      */
-    protected $text;
-
-    /**
-     * IP address that will be used to look up a geocode
-     *
-     * @var string
-     */
-    protected $ip;
-
-    /**
-     * Posting age in days
-     *
-     * @var string
-     */
-    protected $age;
-
-    /**
-     * Specific Dice user ID who posted the job
-     *
-     * @var string
-     */
-    protected $diceid;
-
-    /**
-     * Page number of results to display
-     *
-     * @var integer
-     */
-    protected $page;
-
-    /**
-     * Results per page
-     *
-     * @var integer
-     */
-    protected $pgcnt;
-
-    /**
-     * Sort parameter:
-     *  sort=1 sorts by posted age
-     *  sort=2 sorts by job title
-     *  sort=3 sorts by company
-     *  sort=4 sorts by location
-     *
-     * @var integer
-     */
-    protected $sort;
-
-    /**
-     * Sort direction:
-     *  sd=a sort order is ASCENDING
-     *  sd=d sort order is DESCENDING
-     *
-     * @var string
-     */
-    protected $sd;
+    protected $full_time;
 
     /**
      * Get baseUrl
@@ -113,7 +51,7 @@ class GithubQuery extends AbstractQuery
      */
     public function getBaseUrl()
     {
-        return 'http://service.dice.com/api/rest/jobsearch/v1/simple.json';
+        return 'https://jobs.github.com/positions.json';
     }
 
     /**
@@ -123,6 +61,27 @@ class GithubQuery extends AbstractQuery
      */
     public function getKeyword()
     {
-        return $this->text;
+        return $this->search;
+    }
+
+    /**
+     * Get description (alias for search)
+     *
+     * @return  string Attribute being used as the search keyword
+     */
+    public function getDescription()
+    {
+        return $this->search;
+    }
+
+    /**
+     * Set description (alias for search)
+     *
+     * @return  string Attribute being used as the search keyword
+     */
+    public function setDescription($value = null)
+    {
+        $this->search = $value;
+        return $this;
     }
 }

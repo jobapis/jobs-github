@@ -1,11 +1,11 @@
-<?php namespace JobBrander\Jobs\Client\Providers\Test;
+<?php namespace JobApis\Jobs\Client\Tests;
 
 use DateTime;
-use JobBrander\Jobs\Client\Job;
-use JobBrander\Jobs\Client\Providers\Github;
+use JobApis\Jobs\Client\Job;
+use JobApis\Jobs\Client\Providers\Github;
 use Mockery as m;
 
-class GithubTest extends \PHPUnit_Framework_TestCase
+class GithubProviderTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {

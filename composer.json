@@ -34,12 +34,12 @@
     },
     "autoload": {
         "psr-4": {
-            "JobBrander\\Jobs\\Client\\": "src/"
+            "JobApis\\Jobs\\Client\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "JobBrander\\Jobs\\Client\\Tests\\": "tests/src/"
+            "JobApis\\Jobs\\Client\\Tests\\": "tests/src/"
         }
     }
 }
