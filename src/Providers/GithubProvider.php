@@ -1,9 +1,9 @@
-<?php namespace JobBrander\Jobs\Client\Providers;
+<?php namespace JobApis\Jobs\Client\Providers;
 
 use DateTime;
-use JobBrander\Jobs\Client\Job;
+use JobApis\Jobs\Client\Job;
 
-class Github extends AbstractProvider
+class GithubProvider extends AbstractProvider
 {
     /**
      * Access token
